@@ -1293,3 +1293,69 @@ a:hover {
 .forgot-password-link:hover {
   text-decoration: underline;
 }
+/* 🏁 HERO SECTION: Added a smooth, modern entry animation for elements */
+.hero-section {
+  padding: 6rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Smooth fade-in slide up transition for hero typography */
+.hero-section h1 {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-section p {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 🗂️ GRID CONTAINER: Kept your layout structure exactly the same */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* 🎴 FEATURE CARD: Enhanced transition timing for elite fluid animations */
+.feature-grid-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.4s ease;
+  will-change: transform, box-shadow; /* Optimizes browser rendering for animations */
+}
+
+/* ✨ THE HOVER EFFECT: Combined your TranslateY with a soft elevation shadow */
+.feature-grid-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Optional sub-element rule: If you place icons or graphics inside a wrapper 
+   with this class name inside your cards, they will cleanly scale up on hover */
+.feature-grid-card .card-icon-wrap {
+  display: inline-flex;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.feature-grid-card:hover .card-icon-wrap {
+  transform: scale(1.1) rotate(2deg);
+}
+
+/* 🏷️ SECTION HEADER: Clean alignment structure retained */
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* 🔄 KEYFRAMES: Clean fade-in slide up logic */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
