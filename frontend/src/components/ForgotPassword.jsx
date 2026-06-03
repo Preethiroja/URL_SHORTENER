@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function ForgotPassword() {
@@ -18,7 +18,7 @@ export default function ForgotPassword() {
       });
       const data = await res.json();
       setMessage(data.message);
-    } catch (err) {
+    } catch {
       setMessage('An error occurred. Please try again.');
     } finally {
       setLoading(false);

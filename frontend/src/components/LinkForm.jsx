@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link2, Sparkles, Calendar, Tag, AlertCircle } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com';
@@ -11,6 +11,11 @@ const LinkForm = ({ token, onUrlAdded }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const toLocalISOString = (date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,7 +40,7 @@ const LinkForm = ({ token, onUrlAdded }) => {
           originalUrl,
           title: title || undefined,
           customAlias: customAlias || undefined,
-          expiresAt: expiresAt || undefined
+          expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined
         }),
       });
 
@@ -139,7 +144,7 @@ const LinkForm = ({ token, onUrlAdded }) => {
               className="form-control"
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
+              min={toLocalISOString(new Date())}
             />
           </div>
         </div>

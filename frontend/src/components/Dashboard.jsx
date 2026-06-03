@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, BarChart2, QrCode, Trash2, Edit2, ExternalLink, Link as LinkIcon, RefreshCw, AlertCircle, Upload, Globe } from 'lucide-react'; 
 import LinkForm from './LinkForm';
 import QRModal from './QRModal';
 import EditModal from './EditModal';
 import Loader from './Shared/Loader';
-import ThemeToggle from './ThemeToggle';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com';
 
@@ -43,7 +42,11 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
   };
 
   useEffect(() => {
-    fetchUrls();
+    const timer = setTimeout(() => {
+      fetchUrls();
+    }, 0);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleUrlAdded = (newUrl) => {

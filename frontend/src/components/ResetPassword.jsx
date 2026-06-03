@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 export default function ResetPassword() {
@@ -26,7 +26,7 @@ export default function ResetPassword() {
       if (res.ok) {
         setTimeout(() => navigate('/login'), 3000); // Send them back to login screen after 3 seconds
       }
-    } catch (err) {
+    } catch {
       setMessage('Link expired or invalid. Please request a new one.');
     } finally {
       setLoading(false);

@@ -1,4 +1,3 @@
-import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Download, Copy, Check } from 'lucide-react';
 import { useState } from 'react';

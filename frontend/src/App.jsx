@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home'; 
@@ -69,6 +69,7 @@ function AppContent() {
     };
 
     fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleLoginSuccess = (newToken, rawData) => {
@@ -119,16 +120,7 @@ function AppContent() {
     );
   }
 
-  const AnalyticsWrapper = () => {
-    const { id } = useParams();
-    return (
-      <AnalyticsView
-        token={token}
-        urlId={id}
-        onBack={() => navigate('/dashboard')}
-      />
-    );
-  };
+
 
   return (
     <div className="app-container">
@@ -184,7 +176,7 @@ function AppContent() {
         
         <Route 
           path="/analytics/:id" 
-          element={token ? <AnalyticsWrapper /> : <Navigate to="/login" replace />} 
+          element={token ? <AnalyticsRoute token={token} /> : <Navigate to="/login" replace />} 
         />
 
         {/* 🌐 FIXED: Public Stats Page Route linked inside Routes Switch container */}
@@ -207,6 +199,18 @@ function AppContent() {
         />
       )}
     </div>
+  );
+}
+
+function AnalyticsRoute({ token }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  return (
+    <AnalyticsView
+      token={token}
+      urlId={id}
+      onBack={() => navigate('/dashboard')}
+    />
   );
 }
 

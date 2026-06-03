@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Calendar, ShieldAlert, Monitor, Globe, BarChart2, Zap } from 'lucide-react';
 import Loader from './Shared/Loader';
 import { Line } from 'react-chartjs-2';
@@ -59,7 +59,10 @@ const AnalyticsView = ({ token, urlId, onBack }) => {
   }, [urlId, token]);
 
   useEffect(() => {
-    fetchAnalytics();
+    const timer = setTimeout(() => {
+      fetchAnalytics();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchAnalytics]);
 
   const formatDate = (dateString) => {

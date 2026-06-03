@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Save, AlertCircle } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com';
@@ -6,8 +6,14 @@ const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onr
 const EditModal = ({ urlObj, token, onClose, onUpdateSuccess }) => {
   const [originalUrl, setOriginalUrl] = useState(urlObj.originalUrl);
   const [title, setTitle] = useState(urlObj.title || '');
+
+  const toLocalISOString = (date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+  };
+
   const [expiresAt, setExpiresAt] = useState(
-    urlObj.expiresAt ? new Date(urlObj.expiresAt).toISOString().slice(0, 16) : ''
+    urlObj.expiresAt ? toLocalISOString(new Date(urlObj.expiresAt)) : ''
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,7 +39,7 @@ const EditModal = ({ urlObj, token, onClose, onUpdateSuccess }) => {
         body: JSON.stringify({
           originalUrl,
           title,
-          expiresAt: expiresAt || null // Send null to remove expiry if empty
+          expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null // Send null to remove expiry if empty
         })
       });
 
@@ -105,7 +111,7 @@ const EditModal = ({ urlObj, token, onClose, onUpdateSuccess }) => {
               className="form-control form-control-noicon"
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
+              min={toLocalISOString(new Date())}
             />
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
               Leave blank to clear link expiration.

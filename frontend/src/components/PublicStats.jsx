@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { BarChart2, ExternalLink, ArrowLeft, Globe } from 'lucide-react';
 import Loader from './Shared/Loader';

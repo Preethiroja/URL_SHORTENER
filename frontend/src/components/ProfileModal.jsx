@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, User, Shield, Image } from 'lucide-react';
 
 const API_BASE = 'https://url-shortener-j2ye.onrender.com'; 
@@ -19,10 +19,13 @@ export default function ProfileModal({ user, onClose, onSaved }) {
   // 🔄 Syncs incoming asynchronous database user payloads down to local modal states
   useEffect(() => {
     if (user) {
-      if (user.username) setUsername(user.username);
-      if (user.email) setEmail(user.email);
-      if (user.bio) setBio(user.bio);
-      if (user.avatar) setAvatar(user.avatar);
+      const timer = setTimeout(() => {
+        if (user.username) setUsername(user.username);
+        if (user.email) setEmail(user.email);
+        if (user.bio) setBio(user.bio);
+        if (user.avatar) setAvatar(user.avatar);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [user]);
   
