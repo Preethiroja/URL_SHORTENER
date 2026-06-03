@@ -8,8 +8,7 @@ import Dashboard from './components/Dashboard';
 import AnalyticsView from './components/AnalyticsView';
 import Loader from './components/Shared/Loader';
 import ProfileModal from "./components/ProfileModal";
-
-// 🔐 IMPORTED: Your new password recovery views
+import PublicStats from './components/PublicStats';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 
@@ -144,36 +143,28 @@ function AppContent() {
       <Routes>
         <Route 
           path="/" 
-          element={
-            token ? <Navigate to="/dashboard" replace /> : <Home />
-          } 
+          element={token ? <Navigate to="/dashboard" replace /> : <Home />} 
         />
 
         <Route 
           path="/login" 
-          element={
-            token ? <Navigate to="/dashboard" replace /> : <Login onLoginSuccess={handleLoginSuccess} />
-          } 
+          element={token ? <Navigate to="/dashboard" replace /> : <Login onLoginSuccess={handleLoginSuccess} />} 
         />
+        
         <Route 
           path="/register" 
-          element={
-            token ? <Navigate to="/dashboard" replace /> : <Register onRegisterSuccess={handleLoginSuccess} />
-          } 
+          element={token ? <Navigate to="/dashboard" replace /> : <Register onRegisterSuccess={handleLoginSuccess} />} 
         />
 
-        {/* 🔐 ADDED: Password reset routes setup */}
+        {/* Password reset routes */}
         <Route 
           path="/forgot-password" 
-          element={
-            token ? <Navigate to="/dashboard" replace /> : <ForgotPassword />
-          } 
+          element={token ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} 
         />
+        
         <Route 
           path="/reset-password/:token" 
-          element={
-            token ? <Navigate to="/dashboard" replace /> : <ResetPassword />
-          } 
+          element={token ? <Navigate to="/dashboard" replace /> : <ResetPassword />} 
         />
         
         <Route 
@@ -190,11 +181,16 @@ function AppContent() {
             )
           } 
         />
+        
         <Route 
           path="/analytics/:id" 
-          element={
-            token ? <AnalyticsWrapper /> : <Navigate to="/login" replace />
-          } 
+          element={token ? <AnalyticsWrapper /> : <Navigate to="/login" replace />} 
+        />
+
+        {/* 🌐 FIXED: Public Stats Page Route linked inside Routes Switch container */}
+        <Route 
+          path="/stats/:id" 
+          element={<PublicStats />} 
         />
         
         <Route 

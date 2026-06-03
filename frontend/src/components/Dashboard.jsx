@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, BarChart2, QrCode, Trash2, Edit2, ExternalLink, Link as LinkIcon, RefreshCw, AlertCircle } from 'lucide-react';
+import { Copy, BarChart2, QrCode, Trash2, Edit2, ExternalLink, Link as LinkIcon, RefreshCw, AlertCircle, Upload, Globe } from 'lucide-react'; 
 import LinkForm from './LinkForm';
 import QRModal from './QRModal';
 import EditModal from './EditModal';
@@ -91,7 +91,6 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
   };
 
   const formatShortUrl = (shortCode) => {
-    // Trim protocol for clean representation in UI
     const domain = API_BASE.replace(/(^\w+:|^)\/\//, '');
     return `${domain}/${shortCode}`;
   };
@@ -125,9 +124,78 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
       </div>
 
       <div className="dashboard-grid">
-        {/* Left Side: Create URL Form */}
-        <div>
+        {/* Left Side: Create URL Form & Bulk CSV Processing */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <LinkForm token={token} onUrlAdded={handleUrlAdded} />
+          
+          {/* Bulk CSV Card Section */}
+          <div className="card" style={{ padding: '1.5rem' }}>
+            <div className="card-title" style={{ marginBottom: '0.5rem' }}>
+              <Upload size={20} style={{ color: 'var(--primary)' }} />
+              <span>Bulk URL Shortening</span>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+              Upload a <code>.csv</code> file containing a column explicitly named <strong>url</strong>.
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <label 
+                className="action-btn" 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  gap: '8px', 
+                  cursor: 'pointer', 
+                  width: '100%',
+                  padding: '0.6rem 1rem',
+                  backgroundColor: 'var(--primary)',      
+                  color: 'var(--white, #ffffff)',       
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s ease',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary)'}
+              >
+                <input 
+                  type="file" 
+                  accept=".csv" 
+                  style={{ display: 'none' }} 
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const formData = new FormData();
+                    formData.append('csvFile', file);
+
+                    setLoading(true);
+                    try {
+                      const response = await fetch(`${API_BASE}/api/url/bulk`, {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                      });
+                      
+                      const data = await response.json();
+                      if (!response.ok) throw new Error(data.message || 'Bulk processing failed');
+                      
+                      alert(`Successfully processed file! Shortened ${data.count} URLs.`);
+                      fetchUrls(); 
+                    } catch (err) {
+                      alert(err.message || 'Error processing CSV file');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }} 
+                />
+                <span>Select CSV File</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         {/* Right Side: Links Table */}
@@ -209,6 +277,7 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
                         </td>
                         <td>
                           <div className="actions-cell">
+                            {/* Copy Short URL Link */}
                             <button
                               className="action-btn"
                               title="Copy to clipboard"
@@ -216,6 +285,22 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
                             >
                               <Copy size={14} />
                             </button>
+
+                            {/* Copy Public Stats Page Link (FIXED & LINKED CORRECTLY) */}
+                            <button
+                              className="action-btn"
+                              title="Copy Public Stats Page Link"
+                              style={{ color: 'var(--primary)' }}
+                              onClick={() => {
+                                const publicStatsUrl = `${window.location.origin}/stats/${url._id}`;
+                                navigator.clipboard.writeText(publicStatsUrl);
+                                alert("Public stats dashboard link has been copied successfully!");
+                              }}
+                            >
+                              <Globe size={14} />
+                            </button>
+
+                            {/* View Private Analytics Dashboard */}
                             <button
                               className="action-btn"
                               title="View Analytics"
@@ -223,6 +308,8 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
                             >
                               <BarChart2 size={14} />
                             </button>
+
+                            {/* QR Code Trigger Button */}
                             <button
                               className="action-btn"
                               title="QR Code"
@@ -230,6 +317,8 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
                             >
                               <QrCode size={14} />
                             </button>
+
+                            {/* Edit Link Fields Button */}
                             <button
                               className="action-btn"
                               title="Edit destination"
@@ -237,6 +326,8 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
                             >
                               <Edit2 size={14} />
                             </button>
+
+                            {/* Delete URL Record */}
                             <button
                               className="action-btn delete"
                               title="Delete Link"

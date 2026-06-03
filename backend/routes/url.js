@@ -4,6 +4,9 @@ const validator = require('validator');
 const Url = require('../models/Url');
 const Visit = require('../models/Visit');
 const auth = require('../middleware/auth');
+const multer = require('multer');
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Helper to generate a unique short code
 const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -15,18 +18,96 @@ function generateShortCode(length = 6) {
   return result;
 }
 
+// @route   POST api/url/bulk
+// @desc    Bulk shorten URLs from an uploaded CSV file
+// @access  Private
+router.post('/bulk', auth, upload.single('csvFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please upload a CSV file' });
+    }
+
+    const textContent = req.file.buffer.toString('utf8');
+    const lines = textContent.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+
+    if (lines.length < 2) {
+      return res.status(400).json({ message: 'The uploaded CSV file contains no records' });
+    }
+
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const urlIndex = headers.indexOf('url');
+
+    if (urlIndex === -1) {
+      return res.status(400).json({ message: "CSV file must include a column explicitly named 'url'" });
+    }
+
+    const insertedLinks = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const columns = lines[i].split(',');
+      if (!columns[urlIndex]) continue;
+
+      const targetUrl = columns[urlIndex].trim();
+
+      const isValidUrl = validator.isURL(targetUrl, {
+        protocols: ['http', 'https'],
+        require_protocol: true
+      });
+
+      if (isValidUrl) {
+        let shortCode = generateShortCode();
+        
+        const existing = await Url.findOne({ $or: [{ shortCode }, { customAlias: shortCode }] });
+        if (existing) {
+          shortCode = generateShortCode() + i; 
+        }
+
+        let computedTitle = '';
+        try {
+          computedTitle = new URL(targetUrl).hostname;
+        } catch (_) {
+          computedTitle = 'Shortened Link';
+        }
+
+        insertedLinks.push({
+          originalUrl: targetUrl,
+          shortCode,
+          title: computedTitle,
+          userId: req.user.id,
+          expiresAt: null,
+          clickCount: 0
+        });
+      }
+    }
+
+    if (insertedLinks.length === 0) {
+      return res.status(400).json({ message: 'No valid URLs containing http:// or https:// found inside the file' });
+    }
+
+    await Url.insertMany(insertedLinks);
+
+    res.status(201).json({
+      success: true,
+      count: insertedLinks.length,
+      message: 'Bulk operations processed successfully'
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error processing your bulk upload request' });
+  }
+});
+
 // @route   POST api/url/shorten
 // @desc    Create a shortened URL
 // @access  Private
 router.post('/shorten', auth, async (req, res) => {
   const { originalUrl, customAlias, expiresAt, title } = req.body;
 
-  // Validate original URL
   if (!originalUrl) {
     return res.status(400).json({ message: 'Original URL is required' });
   }
 
-  // Validate URL format (isURL checks protocol, host, etc.)
   const isValidUrl = validator.isURL(originalUrl, {
     protocols: ['http', 'https'],
     require_protocol: true
@@ -38,7 +119,6 @@ router.post('/shorten', auth, async (req, res) => {
   try {
     let shortCode;
 
-    // Handle Custom Alias
     if (customAlias) {
       const aliasClean = customAlias.trim();
       if (aliasClean.length < 3) {
@@ -48,7 +128,6 @@ router.post('/shorten', auth, async (req, res) => {
         return res.status(400).json({ message: 'Custom alias can only contain letters, numbers, hyphens, and underscores' });
       }
 
-      // Check if alias exists in system (shortCode OR customAlias)
       const existing = await Url.findOne({
         $or: [{ shortCode: aliasClean }, { customAlias: aliasClean }]
       });
@@ -57,7 +136,6 @@ router.post('/shorten', auth, async (req, res) => {
       }
       shortCode = aliasClean;
     } else {
-      // Generate a unique short code
       let unique = false;
       let attempts = 0;
       while (!unique && attempts < 10) {
@@ -75,7 +153,6 @@ router.post('/shorten', auth, async (req, res) => {
       }
     }
 
-    // Determine a title if none is provided
     let urlTitle = title || '';
     if (!urlTitle) {
       try {
@@ -117,6 +194,25 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// @route   GET api/url/public-stats/:id
+// @desc    Get clean analytics details for a short URL publicly
+// @access  Public
+router.get('/public-stats/:id', async (req, res) => {
+  try {
+    const urlData = await Url.findById(req.params.id)
+      .select('title originalUrl shortCode clickCount'); 
+
+    if (!urlData) {
+      return res.status(404).json({ message: 'Short URL analytics not found' });
+    }
+
+    res.json(urlData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error fetching public data' });
+  }
+});
+
 // @route   PUT api/url/:id
 // @desc    Update a URL (destination URL and/or expiry)
 // @access  Private
@@ -134,7 +230,7 @@ router.put('/:id', auth, async (req, res) => {
   }
 
   try {
-    const url = await Url.findOne({ _id: req.id || req.params.id, userId: req.user.id });
+    const url = await Url.findOne({ _id: req.params.id, userId: req.user.id });
     if (!url) {
       return res.status(404).json({ message: 'URL not found or unauthorized' });
     }
@@ -142,7 +238,6 @@ router.put('/:id', auth, async (req, res) => {
     if (originalUrl) url.originalUrl = originalUrl;
     if (title !== undefined) url.title = title;
     
-    // Allow removing expiry date by sending null/empty
     if (expiresAt === null || expiresAt === '') {
       url.expiresAt = null;
     } else if (expiresAt) {
@@ -168,9 +263,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'URL not found or unauthorized' });
     }
 
-    // Delete associated visits
     await Visit.deleteMany({ urlId: url._id });
-
     res.json({ message: 'URL and associated analytics deleted successfully' });
   } catch (err) {
     console.error(err);
@@ -188,10 +281,8 @@ router.get('/:id/analytics', auth, async (req, res) => {
       return res.status(404).json({ message: 'URL not found or unauthorized' });
     }
 
-    // Get the 50 most recent visits
     const visits = await Visit.find({ urlId: url._id }).sort({ timestamp: -1 }).limit(50);
 
-    // Aggregate visits by Browser, OS, Device
     const browserStats = await Visit.aggregate([
       { $match: { urlId: url._id } },
       { $group: { _id: '$browser', count: { $sum: 1 } } }
@@ -207,7 +298,6 @@ router.get('/:id/analytics', auth, async (req, res) => {
       { $group: { _id: '$device', count: { $sum: 1 } } }
     ]);
 
-    // Daily click trends for the last 7 days
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
@@ -228,7 +318,6 @@ router.get('/:id/analytics', auth, async (req, res) => {
       { $sort: { _id: 1 } }
     ]);
 
-    // Ensure we send back a complete array of the last 7 dates even if there are 0 clicks
     const dailyClicks = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date();
@@ -241,7 +330,6 @@ router.get('/:id/analytics', auth, async (req, res) => {
       });
     }
 
-    // Find the last visited time
     const lastVisit = visits.length > 0 ? visits[0].timestamp : null;
 
     res.json({

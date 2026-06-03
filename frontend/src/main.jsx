@@ -5,10 +5,9 @@ import './index.css'
 import { GoogleOAuthProvider } from '@react-oauth/google'; // 🌐 ADDED: Google Provider Import
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    {/* 🌐 ADDED: Wrap App with Google OAuth Provider */}
-    <GoogleOAuthProvider clientId="676313052492-eu3gfdqhsc397iu8uarst8pindeu2qs3.apps.googleusercontent.com">
+  <GoogleOAuthProvider clientId="676313052492-eu3gfdqhsc397iu8uarst8pindeu2qs3.apps.googleusercontent.com">
+    <React.StrictMode>
       <App />
-    </GoogleOAuthProvider>
-  </React.StrictMode>,
+    </React.StrictMode>
+  </GoogleOAuthProvider>,
 )
