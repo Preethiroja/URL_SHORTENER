@@ -12,7 +12,7 @@ function getErrorHtml(title, message, code) {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${title} - SnapLink</title>
+      <title>${title} - Linksyk</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
         body {

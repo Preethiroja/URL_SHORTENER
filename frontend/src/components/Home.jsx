@@ -832,7 +832,7 @@ const Home = () => {
       <nav className="public-nav">
         <div className="nav-brand">
           <Link2 size={24} style={{ color: 'var(--primary)' }} />
-          <span>SnapLink</span>
+          <span>Linksy</span>
         </div>
         <div className="public-nav-actions">
           <Link to="/login" className="btn-nav-login">Sign In</Link>

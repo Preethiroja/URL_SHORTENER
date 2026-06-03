@@ -150,7 +150,7 @@ const LinkForm = ({ token, onUrlAdded }) => {
         </div>
 
         <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }} disabled={loading}>
-          {loading ? 'Shortening...' : 'Generate SnapLink'}
+          {loading ? 'Shortening...' : 'Generate Linksy'}
         </button>
       </form>
     </div>

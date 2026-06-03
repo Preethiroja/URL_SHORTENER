@@ -221,7 +221,7 @@ const Dashboard = ({ token, user, onViewAnalytics }) => {
             <div className="empty-state">
               <div className="empty-icon">📭</div>
               <h3>No shortened URLs yet</h3>
-              <p>Enter a long URL on the left to generate your first SnapLink!</p>
+              <p>Enter a long URL on the left to generate your first Linksy!</p>
             </div>
           ) : (
             <div className="table-responsive">

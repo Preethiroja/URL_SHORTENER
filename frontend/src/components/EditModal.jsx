@@ -65,7 +65,7 @@ const EditModal = ({ urlObj, token, onClose, onUpdateSuccess }) => {
           <X size={20} />
         </button>
 
-        <h2 className="modal-title">Edit SnapLink</h2>
+        <h2 className="modal-title">Edit Linksy</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '-0.75rem' }}>
           Short Code: <strong style={{ color: 'var(--accent)' }}>{urlObj.shortCode}</strong>
         </p>
