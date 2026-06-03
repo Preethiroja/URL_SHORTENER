@@ -92,9 +92,20 @@ const Login = ({ onLoginSuccess }) => {
                 required
               />
             </div>
+            
+            {/* 🔐 ADDED: Forgot Password Link */}
+            <div style={{ textAlign: 'right', marginTop: '0.5rem', fontSize: '0.85rem' }}>
+              <Link 
+                to="/forgot-password" 
+                className="forgot-password-link"
+                style={{ textDecoration: 'none', color: 'var(--primary, #0066cc)' }}
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading}>
+          <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }} disabled={loading}>
             {loading ? (
               'Signing In...'
             ) : (

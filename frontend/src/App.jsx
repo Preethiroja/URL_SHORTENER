@@ -9,6 +9,10 @@ import AnalyticsView from './components/AnalyticsView';
 import Loader from './components/Shared/Loader';
 import ProfileModal from "./components/ProfileModal";
 
+// 🔐 IMPORTED: Your new password recovery views
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function AppContent() {
@@ -40,15 +44,12 @@ function AppContent() {
         }
 
         const data = await response.json();
-        
-        // Extract the user profile context safely whether it's nested under data.user or flat at the root
         const userData = data.user ? data.user : data;
 
         if (!userData || !userData.username) {
           throw new Error('User profile not found');
         }
 
-        // Always enforce a clean, normalized, flat state structure
         setUser({
           _id: userData._id || userData.id,
           username: userData.username,
@@ -75,7 +76,6 @@ function AppContent() {
     localStorage.setItem('token', newToken);
     setToken(newToken);
     
-    // Safely extract regardless of auth endpoint layout context
     const userData = rawData?.user ? rawData.user : rawData;
     setUser({
       _id: userData?._id || userData?.id,
@@ -95,7 +95,6 @@ function AppContent() {
   };
 
   const handleProfileUpdate = (updatedUserData, successMessage) => {
-    // Safely unwrap data.user if the modal accidentally passes the entire raw response body instead of just the user block
     const targetData = updatedUserData?.user ? updatedUserData.user : updatedUserData;
 
     setUser({
@@ -160,6 +159,20 @@ function AppContent() {
           path="/register" 
           element={
             token ? <Navigate to="/dashboard" replace /> : <Register onRegisterSuccess={handleLoginSuccess} />
+          } 
+        />
+
+        {/* 🔐 ADDED: Password reset routes setup */}
+        <Route 
+          path="/forgot-password" 
+          element={
+            token ? <Navigate to="/dashboard" replace /> : <ForgotPassword />
+          } 
+        />
+        <Route 
+          path="/reset-password/:token" 
+          element={
+            token ? <Navigate to="/dashboard" replace /> : <ResetPassword />
           } 
         />
         

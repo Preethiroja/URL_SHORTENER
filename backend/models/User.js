@@ -21,7 +21,6 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters long']
   },
-  // 💡 THE CHIEF FIX: Add bio and avatar here so Mongoose allows saving them!
   bio: {
     type: String,
     default: ''
@@ -29,9 +28,16 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: '🦊'
+  },
+  // 🔐 FORGOT PASSWORD FIELDS (Placed cleanly inside the schema definition)
+  resetPasswordToken: {
+    type: String
+  },
+  resetPasswordExpires: {
+    type: Date
   }
 }, {
-  timestamps: true
+  timestamps: true // Schema options object stays cleanly down here
 });
 
 module.exports = mongoose.model('User', userSchema);
