@@ -4,8 +4,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto'); // 🔐 Added for secure token generation
 const nodemailer = require('nodemailer'); // 📧 Added for sending email alerts
+const { OAuth2Client } = require('google-auth-library'); // 🌐 ADDED: Google Auth Library
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+
+// Initialize the Google OAuth Client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @route   POST api/auth/signup
 // @desc    Register a user
@@ -203,7 +207,77 @@ router.put('/change-password', auth, async (req, res) => {
 });
 
 // =========================================================================
-// 🔐 ADDED: PASSWORD RESET SYSTEM ENDPOINTS
+// 🌐 ADDED: GOOGLE OAUTH AUTHENTICATION ENDPOINT
+// =========================================================================
+
+// @route   POST api/auth/google
+// @desc    Authenticate or sign up a user via Google token confirmation
+// @access  Public
+router.post('/google', async (req, res) => {
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res.status(400).json({ message: 'Google identification token is missing' });
+  }
+
+  try {
+    // 1. Verify the payload directly with Google's public security keys
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
+
+    // 2. Check if a user with this email address already exists in MongoDB
+    let user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      // Create a clean, randomized fallback username from their Google Profile Name
+      const generatedUsername = name.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000);
+      
+      // Generate a locked, completely random fallback password since they use Google to log in
+      const randomPasswordSecret = crypto.randomBytes(16).toString('hex');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(randomPasswordSecret, salt);
+
+      user = new User({
+        username: generatedUsername,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        avatar: picture || '🦊'
+      });
+
+      await user.save();
+    }
+
+    // 3. Issue your app's standard JWT session token to pass back to React
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET || 'supersecretjwtsecretkey12345',
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        bio: user.bio || '',
+        avatar: user.avatar
+      }
+    });
+
+  } catch (err) {
+    console.error('Google Authentication Error:', err);
+    res.status(500).json({ message: 'Google login verification process failed' });
+  }
+});
+
+// =========================================================================
+// 🔐 PASSWORD RESET SYSTEM ENDPOINTS
 // =========================================================================
 
 // @route   POST api/auth/forgot-password
@@ -216,21 +290,17 @@ router.post('/forgot-password', async (req, res) => {
   try {
     const user = await User.findOne({ email: email.toLowerCase() });
     
-    // For security reasons, don't confirm or deny if the account exists
     if (!user) {
       return res.json({ message: 'If that email matches an account, a reset link has been sent.' });
     }
 
-    // 1. Generate a raw random crypto string token
     const rawToken = crypto.randomBytes(20).toString('hex');
 
-    // 2. Hash it securely before storing to protect against database-compromise leaks
     user.resetPasswordToken = crypto.createHash('sha256').update(rawToken).digest('hex');
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 Hour lifespan from now
+    user.resetPasswordExpires = Date.now() + 3600000; 
 
     await user.save();
 
-    // 3. Configure NodeMailer Transporter using your system environment variables
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
@@ -239,7 +309,6 @@ router.post('/forgot-password', async (req, res) => {
       },
     });
 
-    // Link pointing directly back to your React Frontend layout route setup
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${rawToken}`;
 
     const mailOptions = {
@@ -271,10 +340,8 @@ router.put('/reset-password/:token', async (req, res) => {
   }
 
   try {
-    // Hash the incoming URL param token to check against database records
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
-    // Find user where token matches and current timestamp is less than expiration timestamp
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
       resetPasswordExpires: { $gt: Date.now() }
@@ -284,11 +351,9 @@ router.put('/reset-password/:token', async (req, res) => {
       return res.status(400).json({ message: 'Reset token is invalid or has expired.' });
     }
 
-    // Hash and save the new password string
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
-    // Clean up temporary token properties from user document completely
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
