@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Shield, Image } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000'; 
+const API_BASE = 'https://url-shortener-j2ye.onrender.com'; 
 const AVATARS = ["🦊", "🐼", "🦁", "🐯", "🦋", "🐬", "🚀", "💎"];
 
 export default function ProfileModal({ user, onClose, onSaved }) {

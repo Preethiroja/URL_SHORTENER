@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google'; 
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com';
 
 const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');

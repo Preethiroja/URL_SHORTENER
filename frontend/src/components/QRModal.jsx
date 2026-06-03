@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 const QRModal = ({ urlObj, onClose }) => {
   const [copied, setCopied] = useState(false);
-  const shortUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/${urlObj.shortCode}`;
+  const shortUrl = `${import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com'}/${urlObj.shortCode}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(shortUrl);

@@ -16,7 +16,7 @@ export default function ResetPassword() {
     setLoading(true);
     setMessage('');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/reset-password/${token}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com'}/api/auth/reset-password/${token}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })

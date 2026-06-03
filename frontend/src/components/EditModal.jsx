@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Save, AlertCircle } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com';
 
 const EditModal = ({ urlObj, token, onClose, onUpdateSuccess }) => {
   const [originalUrl, setOriginalUrl] = useState(urlObj.originalUrl);

@@ -12,7 +12,7 @@ import PublicStats from './components/PublicStats';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com';
 
 function AppContent() {
   const [token, setToken] = useState(localStorage.getItem('token'));

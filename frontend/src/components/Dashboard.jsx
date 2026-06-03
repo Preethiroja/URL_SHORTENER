@@ -6,7 +6,7 @@ import EditModal from './EditModal';
 import Loader from './Shared/Loader';
 import ThemeToggle from './ThemeToggle';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com';
 
 const Dashboard = ({ token, user, onViewAnalytics }) => {
   const [urls, setUrls] = useState([]);

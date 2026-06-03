@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, User, UserPlus, AlertCircle } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://url-shortener-j2ye.onrender.com';
 
 const Register = ({ onRegisterSuccess }) => {
   const [username, setUsername] = useState('');
