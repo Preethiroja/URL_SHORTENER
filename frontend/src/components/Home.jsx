@@ -31,7 +31,7 @@ const Home = () => {
           Create short links, set custom aliases, generate QR codes, and track your total click metrics from a clean, unified dashboard.
         </p>
         <div className="hero-cta-group">
-          <button onClick={() => navigate('/register')} className="btn btn-primary btn-large">
+          <button onClick={() => navigate('/login')} className="btn btn-primary btn-large">
             Get Started Free <ArrowRight size={18} />
           </button>
         </div>
